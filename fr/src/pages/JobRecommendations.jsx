@@ -24,8 +24,7 @@ const JobRecommendations = () => {
     if (userData) {
       setUser(JSON.parse(userData));
     }
-    
-    // Fetch jobs from backend
+
     const fetchJobs = async () => {
       try {
         setLoading(true);
@@ -33,13 +32,13 @@ const JobRecommendations = () => {
         setJobs(response.jobs);
         setError(null);
       } catch (err) {
-        console.error('Error fetching jobs:', err);
-        setError('Failed to load job recommendations. Please try again later.');
+        console.error("Error fetching jobs:", err);
+        setError("Failed to load job recommendations. Please try again later.");
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchJobs();
   }, [navigate]);
 
@@ -57,53 +56,56 @@ const JobRecommendations = () => {
     navigate("/login");
   };
 
-  // Handle personalized recommendations
   const handleGetRecommendations = async () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await getJobRecommendations(20);
-      
+
       if (response.success && response.recommendations) {
         setJobs(response.recommendations);
         setRecommendationMetadata(response.metadata);
         setIsPersonalized(true);
         setError(null);
       } else {
-        throw new Error('Invalid response format');
+        throw new Error("Invalid response format");
       }
     } catch (err) {
-      console.error('Error fetching recommendations:', err);
-      
-      // Handle specific error messages
-      let errorMessage = '';
-      if (err.response?.status === 404) {
-        errorMessage = err.response.data.message || 'Please upload your resume first to get personalized recommendations.';
-      } else if (err.response?.data?.message) {
+      console.error("Error fetching recommendations:", err);
+
+      let errorMessage = "";
+      if (err.response && err.response.status === 404) {
+        errorMessage =
+          err.response.data.message ||
+          "Please upload your resume first to get personalized recommendations.";
+      } else if (
+        err.response &&
+        err.response.data &&
+        err.response.data.message
+      ) {
         errorMessage = err.response.data.message;
-      } else if (err.response?.data?.error) {
+      } else if (err.response && err.response.data && err.response.data.error) {
         errorMessage = err.response.data.error;
       } else {
-        errorMessage = 'Failed to load personalized recommendations. Please make sure you have uploaded your resume.';
+        errorMessage =
+          "Failed to load personalized recommendations. Please make sure you have uploaded your resume.";
       }
-      
+
       setError(errorMessage);
       setIsPersonalized(false);
-      
-      // Try to fall back to showing all jobs
+
       try {
         const fallbackResponse = await getJobs();
         setJobs(fallbackResponse.jobs);
       } catch (fallbackErr) {
-        console.error('Error fetching fallback jobs:', fallbackErr);
+        console.error("Error fetching fallback jobs:", fallbackErr);
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle showing all jobs
   const handleShowAllJobs = async () => {
     try {
       setLoading(true);
@@ -113,42 +115,90 @@ const JobRecommendations = () => {
       setIsPersonalized(false);
       setRecommendationMetadata(null);
     } catch (err) {
-      console.error('Error fetching jobs:', err);
-      setError('Failed to load jobs. Please try again later.');
+      console.error("Error fetching jobs:", err);
+      setError("Failed to load jobs. Please try again later.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <nav className="bg-black shadow-lg w-full h-16 flex-shrink-0">
-        <div className="h-full px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-full">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-white">Madathon</h1>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-rose-50">
+      <nav className="bg-white bg-opacity-80 backdrop-blur-lg shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-red-600 to-rose-600 rounded-xl flex items-center justify-center">
+                <svg
+                  className="w-6 h-6 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
+                </svg>
+              </div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
+                Madathon
+              </h1>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-6">
               {user && (
-                <span className="text-white font-medium">
-                  Welcome, {user.name}
-                </span>
+                <div className="hidden md:flex items-center gap-3 bg-gray-50 px-4 py-2 rounded-full">
+                  <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-rose-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                    {user.name && user.name.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="text-gray-700 font-medium text-sm">
+                    {user.name}
+                  </span>
+                </div>
               )}
               <button
                 onClick={() => navigate("/dashboard")}
-                className="text-white hover:text-red-400 font-medium transition"
+                className="text-gray-700 hover:text-red-600 font-medium transition-colors flex items-center gap-2"
               >
-                Dashboard
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                  />
+                </svg>
+                <span className="hidden sm:inline">Dashboard</span>
               </button>
               <button
                 onClick={() => navigate("/profile")}
-                className="text-white hover:text-red-400 font-medium transition"
+                className="text-gray-700 hover:text-red-600 font-medium transition-colors flex items-center gap-2"
               >
-                Profile
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
+                </svg>
+                <span className="hidden sm:inline">Profile</span>
               </button>
               <button
                 onClick={handleLogout}
-                className="bg-white text-red-700 px-4 py-2 rounded-lg font-semibold hover:bg-red-50 transition"
+                className="bg-gradient-to-r from-red-600 to-rose-600 text-white px-6 py-2.5 rounded-xl font-semibold hover:from-red-700 hover:to-rose-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
               >
                 Logout
               </button>
@@ -157,108 +207,282 @@ const JobRecommendations = () => {
         </div>
       </nav>
 
-      <div className="flex justify-center mb-6">
-        <div className="flex gap-4">
-          <button
-            className="bg-red-700 text-white py-3 px-8 rounded-lg font-semibold hover:bg-red-800 transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={handleGetRecommendations}
-            disabled={loading}
-          >
-            {loading && isPersonalized ? 'Loading...' : '🎯 Get Personalized Recommendations'}
-          </button>
-          
-          {isPersonalized && (
-            <button
-              className="bg-gray-700 text-white py-3 px-8 rounded-lg font-semibold hover:bg-gray-800 transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={handleShowAllJobs}
-              disabled={loading}
-            >
-              {loading && !isPersonalized ? 'Loading...' : '📋 Show All Jobs'}
-            </button>
-          )}
+      <div className="bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 -left-4 w-72 h-72 bg-white rounded-full mix-blend-overlay filter blur-xl animate-blob"></div>
+          <div className="absolute top-0 -right-4 w-72 h-72 bg-white rounded-full mix-blend-overlay filter blur-xl animate-blob animation-delay-2000"></div>
+          <div className="absolute -bottom-8 left-20 w-72 h-72 bg-white rounded-full mix-blend-overlay filter blur-xl animate-blob animation-delay-4000"></div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
+          <div className="text-center">
+            <div className="w-20 h-20 bg-white bg-opacity-20 backdrop-blur-lg rounded-2xl flex items-center justify-center mx-auto mb-6 border-2 border-white border-opacity-30">
+              <svg
+                className="w-12 h-12 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
+              </svg>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              {isPersonalized
+                ? "Your Personalized Matches"
+                : "Job Recommendations"}
+            </h1>
+            <p className="text-xl text-rose-100 max-w-2xl mx-auto mb-8">
+              {loading
+                ? "Loading opportunities..."
+                : isPersonalized
+                ? `${jobs.length} AI-matched jobs tailored to your unique profile`
+                : `Explore ${jobs.length} exciting career opportunities`}
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                className="bg-white text-red-600 py-3 px-8 rounded-xl font-semibold hover:bg-red-50 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                onClick={handleGetRecommendations}
+                disabled={loading}
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
+                </svg>
+                {loading && isPersonalized
+                  ? "Loading..."
+                  : "Get Personalized Recommendations"}
+              </button>
+
+              {isPersonalized && (
+                <button
+                  className="bg-white bg-opacity-20 backdrop-blur-lg text-white border-2 border-white border-opacity-30 py-3 px-8 rounded-xl font-semibold hover:bg-opacity-30 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  onClick={handleShowAllJobs}
+                  disabled={loading}
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                    />
+                  </svg>
+                  {loading && !isPersonalized ? "Loading..." : "Show All Jobs"}
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
-      <main className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-6">
-            <h2 className="text-3xl font-bold text-red-700 mb-2">
-              {isPersonalized ? '🎯 Your Personalized Job Recommendations' : 'Job Recommendations'}
-            </h2>
-            <p className="text-gray-600">
-              {loading 
-                ? "Loading opportunities..." 
-                : isPersonalized
-                  ? `Found ${jobs.length} jobs tailored to your resume ${recommendationMetadata ? `(analyzed ${recommendationMetadata.totalJobsAnalyzed} jobs)` : ''}`
-                  : `Explore ${jobs.length} exciting opportunities`
-              }
-            </p>
-            
-            {isPersonalized && recommendationMetadata && (
-              <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
-                <p>✨ <strong>AI-Powered Matching:</strong> Jobs ranked by similarity to your resume using advanced cosine similarity analysis ({recommendationMetadata.embeddingDimension}-dimensional embeddings)</p>
-              </div>
-            )}
-          </div>
-
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-              <div className="flex items-center">
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd"/>
-                </svg>
-                <div>
-                  <p className="font-semibold">{error}</p>
-                  {error.includes('resume') && (
-                    <p className="text-sm mt-1">Go to <button onClick={() => navigate('/add-embeddings')} className="underline font-semibold hover:text-red-900">Add Embeddings</button> to upload your resume.</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-700"></div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {jobs.map((job, index) => (
-                <div
-                  key={job.id || job.jobId}
-                  className="bg-white rounded-lg shadow-md border border-gray-200 p-6 hover:shadow-xl transition-shadow flex flex-col cursor-pointer relative"
-                  onClick={() => handleJobClick(job)}
+      {isPersonalized && recommendationMetadata && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-20">
+          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl shadow-xl p-6 text-white">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-white bg-opacity-20 backdrop-blur-lg rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  {/* Match Score Badge for Personalized Recommendations */}
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-bold text-lg mb-1">
+                  AI-Powered Smart Matching
+                </h3>
+                <p className="text-blue-100 text-sm">
+                  Jobs ranked by similarity to your resume using advanced cosine
+                  similarity analysis with{" "}
+                  {recommendationMetadata.embeddingDimension}-dimensional
+                  embeddings. Analyzed{" "}
+                  {recommendationMetadata.totalJobsAnalyzed} jobs to find your
+                  best matches.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                {isPersonalized && <span className="text-3xl">🎯</span>}
+                {isPersonalized
+                  ? "Your Top Matches"
+                  : "Available Opportunities"}
+              </h2>
+              <p className="text-gray-600 mt-1">
+                {isPersonalized
+                  ? "Sorted by relevance to your profile"
+                  : "Browse all available positions"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {error && (
+          <div className="bg-gradient-to-r from-red-50 to-rose-50 border-2 border-red-200 rounded-2xl p-6 mb-8">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg
+                  className="w-6 h-6 text-red-600"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-red-800 text-lg mb-1">
+                  Unable to Load Recommendations
+                </h3>
+                <p className="text-red-700 mb-3">{error}</p>
+                {error.includes("resume") && (
+                  <button
+                    onClick={() => navigate("/add-embeddings")}
+                    className="bg-gradient-to-r from-red-600 to-rose-600 text-white px-6 py-2.5 rounded-xl font-semibold hover:from-red-700 hover:to-rose-700 transition-all shadow-md inline-flex items-center gap-2"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                      />
+                    </svg>
+                    Upload Resume
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {loading ? (
+          <div className="flex flex-col justify-center items-center h-64">
+            <div className="relative">
+              <div className="animate-spin rounded-full h-16 w-16 border-4 border-red-200"></div>
+              <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-red-600 absolute top-0"></div>
+            </div>
+            <p className="mt-4 text-gray-600 font-medium">
+              Finding perfect matches...
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {jobs.map((job, index) => (
+              <div
+                key={job.id || job.jobId}
+                className="group bg-white rounded-2xl shadow-md border border-gray-200 hover:shadow-2xl hover:border-red-300 transition-all duration-300 flex flex-col cursor-pointer overflow-hidden transform hover:-translate-y-1"
+                onClick={() => handleJobClick(job)}
+              >
+                <div
+                  className={`h-1.5 ${
+                    isPersonalized && index < 3
+                      ? index === 0
+                        ? "bg-gradient-to-r from-yellow-400 to-yellow-600"
+                        : index === 1
+                        ? "bg-gradient-to-r from-gray-400 to-gray-600"
+                        : "bg-gradient-to-r from-orange-400 to-orange-600"
+                      : "bg-gradient-to-r from-red-400 to-rose-600"
+                  }`}
+                ></div>
+
+                <div className="p-6 flex flex-col flex-1">
                   {isPersonalized && job.similarityScore !== undefined && (
-                    <div className="absolute top-4 right-4">
-                      <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
+                    <div className="mb-4">
+                      <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
+                        <svg
+                          className="w-4 h-4"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
                         {(job.similarityScore * 100).toFixed(1)}% Match
                       </div>
                     </div>
                   )}
-                  
-                  {/* Rank Badge for Top Recommendations */}
+
                   {isPersonalized && index < 3 && (
-                    <div className="absolute top-4 left-4">
-                      <div className={`text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg ${
-                        index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : 'bg-orange-400'
-                      }`}>
-                        #{index + 1}
-                      </div>
+                    <div className="mb-2">
+                      <span
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold text-white shadow-md ${
+                          index === 0
+                            ? "bg-gradient-to-r from-yellow-400 to-yellow-600"
+                            : index === 1
+                            ? "bg-gradient-to-r from-gray-400 to-gray-600"
+                            : "bg-gradient-to-r from-orange-400 to-orange-600"
+                        }`}
+                      >
+                        {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"} Top #
+                        {index + 1}
+                      </span>
                     </div>
                   )}
-                  
-                  <div className="mb-4 mt-8">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+
+                  <div className="mb-4">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-red-600 transition-colors">
                       {job.title || job.jobTitle}
                     </h3>
-                    <p className="text-red-700 font-semibold mb-1">
+                    <p className="text-red-600 font-semibold mb-2 flex items-center gap-2">
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                        />
+                      </svg>
                       {job.company}
                     </p>
-                    <div className="flex items-center text-sm text-gray-600 mb-1">
+                    <div className="flex items-center text-sm text-gray-600 mb-2">
                       <svg
-                        className="w-4 h-4 mr-1"
+                        className="w-4 h-4 mr-1.5 text-gray-400"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -278,34 +502,335 @@ const JobRecommendations = () => {
                       </svg>
                       {job.location}
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <span className="bg-gray-100 px-2 py-1 rounded">
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="bg-red-50 text-red-700 px-3 py-1 rounded-full font-medium">
                         {job.type}
                       </span>
-                      <span className="bg-gray-100 px-2 py-1 rounded">
+                      <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full font-medium">
                         {job.experience}
                       </span>
                     </div>
                   </div>
 
-                  <div className="mb-4">
-                    <p className="text-sm text-gray-700 mb-3 line-clamp-3">
+                  <div className="mb-4 flex-1">
+                    <p className="text-sm text-gray-700 line-clamp-3 leading-relaxed">
                       {job.description}
                     </p>
-                    <p className="text-lg font-bold text-green-700">
+                  </div>
+
+                  <div className="mb-4">
+                    <p className="text-xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                       {job.salary}
                     </p>
                   </div>
 
                   <div className="mb-4">
-                    <p className="text-xs font-semibold text-gray-600 mb-2">
+                    <p className="text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">
                       Required Skills:
                     </p>
-                    <div className="flex flex-wrap gap-1">
-                      {job.skills.map((skill, index) => (
+                    <div className="flex flex-wrap gap-1.5">
+                      {job.skills.slice(0, 5).map((skill, skillIndex) => (
+                        <span
+                          key={skillIndex}
+                          className="bg-gradient-to-r from-red-50 to-rose-50 text-red-700 text-xs px-2.5 py-1 rounded-lg font-medium border border-red-200"
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                      {job.skills.length > 5 && (
+                        <span className="text-xs text-gray-500 px-2 py-1">
+                          +{job.skills.length - 5} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <button className="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-red-700 hover:to-rose-700 transition-all shadow-md group-hover:shadow-lg flex items-center justify-center gap-2">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M14 5l7 7m0 0l-7 7m7-7H3"
+                      />
+                    </svg>
+                    Apply Now
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {selectedJob && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-2xl max-w-4xl w-full max-h-screen overflow-hidden shadow-2xl">
+              <div className="bg-gradient-to-r from-red-600 to-rose-600 px-8 py-6 relative">
+                <div className="absolute inset-0 opacity-10">
+                  <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full blur-3xl"></div>
+                </div>
+                <div className="relative">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-3xl font-bold text-white mb-2">
+                        {selectedJob.title || selectedJob.jobTitle}
+                      </h3>
+                      <p className="text-rose-100 font-semibold text-lg flex items-center gap-2">
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                          />
+                        </svg>
+                        {selectedJob.company}
+                      </p>
+                    </div>
+                    <button
+                      onClick={closeModal}
+                      className="w-10 h-10 bg-white bg-opacity-20 hover:bg-opacity-30 backdrop-blur-lg rounded-xl flex items-center justify-center transition-all ml-4"
+                    >
+                      <svg
+                        className="w-6 h-6 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {isPersonalized &&
+                    selectedJob.similarityScore !== undefined && (
+                      <div className="inline-block">
+                        <div className="bg-white bg-opacity-20 backdrop-blur-lg text-white px-5 py-2.5 rounded-full font-bold shadow-lg border-2 border-white border-opacity-30 flex items-center gap-2">
+                          <svg
+                            className="w-5 h-5"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                          {(selectedJob.similarityScore * 100).toFixed(1)}%
+                          Match with Your Resume
+                        </div>
+                      </div>
+                    )}
+                </div>
+              </div>
+
+              <div
+                className="overflow-y-auto"
+                style={{ maxHeight: "calc(90vh - 200px)" }}
+              >
+                <div className="p-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    <div className="flex items-center gap-3 bg-gray-50 rounded-xl p-4">
+                      <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                        <svg
+                          className="w-5 h-5 text-red-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-600 font-medium">
+                          Location
+                        </p>
+                        <p className="text-gray-900 font-semibold">
+                          {selectedJob.location}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 bg-gray-50 rounded-xl p-4">
+                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <svg
+                          className="w-5 h-5 text-blue-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-600 font-medium">
+                          Job Type
+                        </p>
+                        <p className="text-gray-900 font-semibold">
+                          {selectedJob.type}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 bg-gray-50 rounded-xl p-4">
+                      <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                        <svg
+                          className="w-5 h-5 text-orange-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-600 font-medium">
+                          Experience
+                        </p>
+                        <p className="text-gray-900 font-semibold">
+                          {selectedJob.experience}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border-2 border-green-200">
+                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                        <svg
+                          className="w-5 h-5 text-green-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-xs text-green-700 font-medium">
+                          Salary
+                        </p>
+                        <p className="text-green-700 font-bold text-lg">
+                          {selectedJob.salary}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mb-8">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                        <svg
+                          className="w-4 h-4 text-red-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
+                      </div>
+                      <h4 className="text-xl font-bold text-gray-900">
+                        Job Description
+                      </h4>
+                    </div>
+                    <p className="text-gray-700 leading-relaxed bg-gray-50 rounded-xl p-5">
+                      {selectedJob.description}
+                    </p>
+                  </div>
+
+                  <div className="mb-8">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <svg
+                          className="w-4 h-4 text-blue-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      </div>
+                      <h4 className="text-xl font-bold text-gray-900">
+                        Role Explanation
+                      </h4>
+                    </div>
+                    <p className="text-gray-700 whitespace-pre-line leading-relaxed bg-gray-50 rounded-xl p-5">
+                      {selectedJob.explanation}
+                    </p>
+                  </div>
+
+                  <div className="mb-8">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-8 h-8 bg-rose-100 rounded-lg flex items-center justify-center">
+                        <svg
+                          className="w-4 h-4 text-rose-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      </div>
+                      <h4 className="text-xl font-bold text-gray-900">
+                        Required Skills
+                      </h4>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedJob.skills.map((skill, index) => (
                         <span
                           key={index}
-                          className="bg-red-50 text-red-700 text-xs px-2 py-1 rounded-full"
+                          className="bg-gradient-to-r from-red-50 to-rose-50 text-red-700 px-4 py-2 rounded-xl font-medium border border-red-200"
                         >
                           {skill}
                         </span>
@@ -313,153 +838,30 @@ const JobRecommendations = () => {
                     </div>
                   </div>
 
-                  <button className="w-full bg-red-700 text-white py-2 px-4 rounded-lg font-semibold hover:bg-red-800 transition">
-                    Apply Now
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Job Detail Modal */}
-        {selectedJob && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                      {selectedJob.title || selectedJob.jobTitle}
-                    </h3>
-                    <p className="text-red-700 font-semibold text-lg">
-                      {selectedJob.company}
-                    </p>
-                    
-                    {/* Match Score in Modal */}
-                    {isPersonalized && selectedJob.similarityScore !== undefined && (
-                      <div className="mt-3 inline-block">
-                        <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-full font-bold shadow-lg">
-                          🎯 {(selectedJob.similarityScore * 100).toFixed(1)}% Match with Your Resume
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <button
-                    onClick={closeModal}
-                    className="text-gray-500 hover:text-gray-700 text-2xl ml-4"
-                  >
-                    &times;
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  <div className="flex items-center text-gray-600">
-                    <svg
-                      className="w-5 h-5 mr-2"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                    </svg>
-                    {selectedJob.location}
-                  </div>
-                  <div className="flex items-center text-gray-600">
-                    <svg
-                      className="w-5 h-5 mr-2"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                      />
-                    </svg>
-                    {selectedJob.type}
-                  </div>
-                  <div className="flex items-center text-gray-600">
-                    <svg
-                      className="w-5 h-5 mr-2"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    {selectedJob.experience}
-                  </div>
-                  <div className="flex items-center text-green-700 font-bold text-lg">
-                    <svg
-                      className="w-5 h-5 mr-2"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
-                      />
-                    </svg>
-                    {selectedJob.salary}
-                  </div>
-                </div>
-
-                <div className="mb-6">
-                  <h4 className="text-lg font-semibold text-gray-800 mb-2">Job Description</h4>
-                  <p className="text-gray-700">{selectedJob.description}</p>
-                </div>
-
-                <div className="mb-6">
-                  <h4 className="text-lg font-semibold text-gray-800 mb-2">Role Explanation</h4>
-                  <p className="text-gray-700 whitespace-pre-line">{selectedJob.explanation}</p>
-                </div>
-
-                <div className="mb-6">
-                  <h4 className="text-lg font-semibold text-gray-800 mb-2">Required Skills</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedJob.skills.map((skill, index) => (
-                      <span
-                        key={index}
-                        className="bg-red-100 text-red-700 px-3 py-1 rounded-full"
+                  <div className="flex gap-4">
+                    <button className="flex-1 bg-gradient-to-r from-red-600 to-rose-600 text-white py-4 px-6 rounded-xl font-bold hover:from-red-700 hover:to-rose-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
                       >
-                        {skill}
-                      </span>
-                    ))}
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M14 5l7 7m0 0l-7 7m7-7H3"
+                        />
+                      </svg>
+                      Apply Now
+                    </button>
+                    <button
+                      onClick={closeModal}
+                      className="flex-1 bg-gray-100 text-gray-800 py-4 px-6 rounded-xl font-bold hover:bg-gray-200 transition-all border-2 border-gray-200"
+                    >
+                      Close
+                    </button>
                   </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <button className="flex-1 bg-red-700 text-white py-3 px-4 rounded-lg font-semibold hover:bg-red-800 transition">
-                    Apply Now
-                  </button>
-                  <button
-                    onClick={closeModal}
-                    className="flex-1 bg-gray-200 text-gray-800 py-3 px-4 rounded-lg font-semibold hover:bg-gray-300 transition"
-                  >
-                    Close
-                  </button>
                 </div>
               </div>
             </div>
