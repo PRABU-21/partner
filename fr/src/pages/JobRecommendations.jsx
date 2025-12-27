@@ -243,38 +243,15 @@ const JobRecommendations = () => {
                 : `Explore ${jobs.length} exciting career opportunities`}
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                className="bg-white text-red-600 py-3 px-8 rounded-xl font-semibold hover:bg-red-50 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                onClick={handleGetRecommendations}
-                disabled={loading}
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
-                {loading && isPersonalized
-                  ? "Loading..."
-                  : "Get Personalized Recommendations"}
-              </button>
-
-              {isPersonalized && (
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              {!isPersonalized && (
                 <button
-                  className="bg-white bg-opacity-20 backdrop-blur-lg text-white border-2 border-white border-opacity-30 py-3 px-8 rounded-xl font-semibold hover:bg-opacity-30 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  onClick={handleShowAllJobs}
+                  className="group bg-white text-red-600 py-4 px-10 rounded-2xl font-bold text-lg hover:bg-red-50 transition-all shadow-xl hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 transform hover:-translate-y-1 hover:scale-105 min-w-[280px]"
+                  onClick={handleGetRecommendations}
                   disabled={loading}
                 >
                   <svg
-                    className="w-5 h-5"
+                    className="w-7 h-7 group-hover:scale-110 transition-transform"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -283,11 +260,56 @@ const JobRecommendations = () => {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                      d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
                     />
                   </svg>
-                  {loading && !isPersonalized ? "Loading..." : "Show All Jobs"}
+                  {loading ? "Loading..." : "Get AI Recommendations"}
                 </button>
+              )}
+
+              {isPersonalized && (
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <button
+                    className="group bg-white text-red-600 py-3 px-8 rounded-xl font-semibold hover:bg-red-50 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transform hover:-translate-y-0.5"
+                    onClick={handleGetRecommendations}
+                    disabled={loading}
+                  >
+                    <svg
+                      className="w-5 h-5 group-hover:rotate-180 transition-transform"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                      />
+                    </svg>
+                    Refresh Matches
+                  </button>
+                  <button
+                    className="group bg-white/20 backdrop-blur-lg text-white border-2 border-white/30 py-3 px-8 rounded-xl font-semibold hover:bg-white/30 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transform hover:-translate-y-0.5"
+                    onClick={handleShowAllJobs}
+                    disabled={loading}
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 6h16M4 10h16M4 14h16M4 18h16"
+                      />
+                    </svg>
+                    View All Jobs
+                  </button>
+                </div>
               )}
             </div>
           </div>
@@ -300,7 +322,7 @@ const JobRecommendations = () => {
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 bg-white bg-opacity-20 backdrop-blur-lg rounded-xl flex items-center justify-center flex-shrink-0">
                 <svg
-                  className="w-6 h-6"
+                  className="w-7 h-7"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -309,7 +331,7 @@ const JobRecommendations = () => {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                    d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"
                   />
                 </svg>
               </div>
@@ -336,7 +358,21 @@ const JobRecommendations = () => {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                {isPersonalized && <span className="text-3xl">🎯</span>}
+                {isPersonalized && (
+                  <svg
+                    className="w-7 h-7 text-red-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+                    />
+                  </svg>
+                )}
                 {isPersonalized
                   ? "Your Top Matches"
                   : "Available Opportunities"}
@@ -356,13 +392,15 @@ const JobRecommendations = () => {
               <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
                 <svg
                   className="w-6 h-6 text-red-600"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
                   <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                    clipRule="evenodd"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                   />
                 </svg>
               </div>
@@ -454,8 +492,14 @@ const JobRecommendations = () => {
                             : "bg-gradient-to-r from-orange-400 to-orange-600"
                         }`}
                       >
-                        {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"} Top #
-                        {index + 1}
+                        <svg
+                          className="w-3 h-3 mr-1"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        Top #{index + 1}
                       </span>
                     </div>
                   )}
@@ -482,7 +526,7 @@ const JobRecommendations = () => {
                     </p>
                     <div className="flex items-center text-sm text-gray-600 mb-2">
                       <svg
-                        className="w-4 h-4 mr-1.5 text-gray-400"
+                        className="w-4 h-4 mr-1.5"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -519,7 +563,20 @@ const JobRecommendations = () => {
                   </div>
 
                   <div className="mb-4">
-                    <p className="text-xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                    <p className="text-xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent flex items-center gap-2">
+                      <svg
+                        className="w-5 h-5 text-green-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
                       {job.salary}
                     </p>
                   </div>
@@ -546,6 +603,7 @@ const JobRecommendations = () => {
                   </div>
 
                   <button className="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-red-700 hover:to-rose-700 transition-all shadow-md group-hover:shadow-lg flex items-center justify-center gap-2">
+                    Apply Now
                     <svg
                       className="w-4 h-4"
                       fill="none"
@@ -559,7 +617,6 @@ const JobRecommendations = () => {
                         d="M14 5l7 7m0 0l-7 7m7-7H3"
                       />
                     </svg>
-                    Apply Now
                   </button>
                 </div>
               </div>
@@ -738,7 +795,7 @@ const JobRecommendations = () => {
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             strokeWidth={2}
-                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
+                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                           />
                         </svg>
                       </div>
@@ -818,7 +875,7 @@ const JobRecommendations = () => {
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             strokeWidth={2}
-                            d="M5 13l4 4L19 7"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                           />
                         </svg>
                       </div>
@@ -840,6 +897,7 @@ const JobRecommendations = () => {
 
                   <div className="flex gap-4">
                     <button className="flex-1 bg-gradient-to-r from-red-600 to-rose-600 text-white py-4 px-6 rounded-xl font-bold hover:from-red-700 hover:to-rose-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
+                      Apply Now
                       <svg
                         className="w-5 h-5"
                         fill="none"
@@ -853,7 +911,6 @@ const JobRecommendations = () => {
                           d="M14 5l7 7m0 0l-7 7m7-7H3"
                         />
                       </svg>
-                      Apply Now
                     </button>
                     <button
                       onClick={closeModal}
