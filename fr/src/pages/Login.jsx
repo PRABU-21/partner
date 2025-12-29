@@ -66,7 +66,7 @@ const Login = () => {
             <h1 className="text-5xl font-bold mb-4 leading-tight">
               Welcome to
               <br />
-              Madathon
+              Vectora
             </h1>
             <p className="text-xl text-red-100 leading-relaxed">
               Your gateway to discovering amazing career opportunities tailored
@@ -304,7 +304,7 @@ const Login = () => {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-4 bg-gradient-to-br from-gray-50 to-white text-gray-500">
-                  New to Madathon?
+                  New to Vectora?
                 </span>
               </div>
             </div>

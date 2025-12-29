@@ -10,6 +10,8 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import JobRecommendations from "./pages/JobRecommendations";
 import AddEmbeddings from "./pages/AddEmbeddings";
+import FreelancerModule from "./pages/FreelancerModule";
+import FreelancerProfile from "./pages/FreelancerProfile";
 import "./App.css";
 
 function App() {
@@ -22,6 +24,8 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/job-recommendations" element={<JobRecommendations />} />
         <Route path="/add-embeddings" element={<AddEmbeddings />} />
+        <Route path="/freelancer-module" element={<FreelancerModule />} />
+        <Route path="/freelancer-profile" element={<FreelancerProfile />} />
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>

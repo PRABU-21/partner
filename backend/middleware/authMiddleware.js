@@ -27,3 +27,23 @@ export const protect = async (req, res, next) => {
     res.status(401).json({ message: "Not authorized, no token" });
   }
 };
+
+// Optional auth: attaches req.userId if a valid bearer token is present, but does not block when missing/invalid
+export const optionalProtect = async (req, res, next) => {
+  let token;
+
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    try {
+      token = req.headers.authorization.split(" ")[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.userId = decoded.id;
+    } catch (error) {
+      // ignore invalid tokens for optional auth
+    }
+  }
+
+  next();
+};

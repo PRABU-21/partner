@@ -7,6 +7,9 @@ import { fileURLToPath } from "url";
 import authRoutes from "./routes/authRoutes.js";
 import embeddingRoutes from "./routes/embeddingRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
+import projectRoutes from "./routes/projectRoutes.js";
+import proposalRoutes from "./routes/proposalRoutes.js";
+import freelancerRoutes from "./routes/freelancerRoutes.js";
 import fs from "fs";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -32,6 +35,9 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/auth", authRoutes);
 app.use("/api/embeddings", embeddingRoutes);
 app.use("/api/jobs", jobRoutes);
+app.use("/api/projects", projectRoutes);
+app.use("/api/proposals", proposalRoutes);
+app.use("/api/freelancers", freelancerRoutes);
 
 // Database connection
 const connectDB = async () => {
