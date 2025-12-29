@@ -211,7 +211,9 @@ const FreelancerModule = () => {
     }
   };
 
-  const filteredProjects = projects.filter(project => {
+  const safeProjects = Array.isArray(projects) ? projects : [];
+
+  const filteredProjects = safeProjects.filter(project => {
     if (activeTab === 'view-projects' || activeTab === 'dashboard' || activeTab === 'manage-proposals') return true;
 
     const status = project.status || '';
@@ -264,9 +266,9 @@ const FreelancerModule = () => {
                   />
                 </svg>
               </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
+              <span className="text-2xl font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
                 Vectora
-              </h1>
+              </span>
             </div>
             <div className="flex items-center gap-4">
               <button

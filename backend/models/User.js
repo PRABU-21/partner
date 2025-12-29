@@ -77,6 +77,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  parsedProfile: {
+    type: Object,
+    default: {},
+  },
   createdAt: {
     type: Date,
     default: Date.now,

@@ -37,8 +37,11 @@ export const signup = async (req, res) => {
       employmentType,
     } = req.body;
 
+    // Normalize email for consistent lookups
+    const normalizedEmail = (email || "").toLowerCase();
+
     // Check if user already exists
-    const userExists = await User.findOne({ email });
+    const userExists = await User.findOne({ email: normalizedEmail });
     if (userExists) {
       return res.status(400).json({ message: "User already exists" });
     }
@@ -46,7 +49,7 @@ export const signup = async (req, res) => {
     // Create user
     const user = await User.create({
       name,
-      email,
+      email: normalizedEmail,
       password,
       phoneNumber,
       location: {
@@ -96,8 +99,10 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    const normalizedEmail = (email || "").toLowerCase();
+
     // Check for user email
-    const user = await User.findOne({ email }).select("+password");
+    const user = await User.findOne({ email: normalizedEmail }).select("+password");
 
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password" });

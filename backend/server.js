@@ -1,7 +1,7 @@
+import "dotenv/config";
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import authRoutes from "./routes/authRoutes.js";
@@ -11,12 +11,11 @@ import projectRoutes from "./routes/projectRoutes.js";
 import proposalRoutes from "./routes/proposalRoutes.js";
 import freelancerRoutes from "./routes/freelancerRoutes.js";
 import newsRoutes from "./routes/newsRoutes.js";
+import resumeRoutes from "./routes/resumeRoutes.js";
 import fs from "fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-dotenv.config();
 
 const app = express();
 
@@ -40,6 +39,7 @@ app.use("/api/projects", projectRoutes);
 app.use("/api/proposals", proposalRoutes);
 app.use("/api/freelancers", freelancerRoutes);
 app.use("/api/news", newsRoutes);
+app.use("/api/resume", resumeRoutes);
 
 // Database connection
 const connectDB = async () => {

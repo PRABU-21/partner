@@ -116,6 +116,16 @@ function safeJsonParse(str) {
   }
 }
 
+function extractFirstJsonObject(str) {
+  if (!str) return null;
+  const match = str.match(/\{[\s\S]*\}/);
+  if (match) {
+    const parsed = safeJsonParse(match[0]);
+    if (parsed) return parsed;
+  }
+  return null;
+}
+
 // ----------------- Helper: Flatten content -----------------
 function flatten(value) {
   if (!value) return "";
@@ -262,13 +272,17 @@ export const uploadEmbedding = async (req, res) => {
 
     // Use safe JSON parsing
     console.log("🔄 Attempting to parse Gemini response as JSON...");
-    let parsedJSON = safeJsonParse(parsedRaw);
+    let parsedJSON = safeJsonParse(parsedRaw) || extractFirstJsonObject(parsedRaw);
 
     if (parsedJSON === null) {
-      console.error("❌ Failed to parse Gemini JSON after all attempts");
-      return res
-        .status(500)
-        .json({ error: "Failed to parse Gemini JSON", raw: parsedRaw });
+      console.warn("⚠️ Gemini JSON parse failed; using minimal fallback");
+      parsedJSON = {
+        title: null,
+        summary: null,
+        keywords: [],
+        categories: [],
+        content: textContent.substring(0, 5000),
+      };
     }
 
     console.log("✅ JSON parsed successfully:", Object.keys(parsedJSON));

@@ -78,7 +78,6 @@ const Dashboard = () => {
               </div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
                 Vectora
-                Vectora
               </h1>
             </div>
             <div className="flex items-center gap-6">
@@ -330,7 +329,7 @@ const Dashboard = () => {
                 Update Profile
               </h3>
               <p className="text-gray-600 text-sm mb-6 leading-relaxed">
-                Upload your resume to enhance your profile and unlock better job
+                Upload your resume to enhance your profile and update it instantly and unlock better job
                 matches.
               </p>
               <button

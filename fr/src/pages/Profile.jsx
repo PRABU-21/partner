@@ -1,12 +1,62 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import ResumeParserCard from "../components/ResumeParserCard";
+import { getParsedProfile } from "../data/api";
+
+const InfoField = ({ label, value, spanFull }) => (
+  <div className={`group ${spanFull ? "md:col-span-2" : ""}`}>
+    <label className="block text-sm font-semibold text-gray-600 mb-2 flex items-center gap-2">
+      <svg
+        className="w-4 h-4 text-red-500"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+      </svg>
+      {label}
+    </label>
+    <div className="bg-gray-50 px-4 py-3 rounded-xl border border-gray-200 group-hover:border-red-200 transition-colors min-h-[48px]">
+      <p className="text-lg text-gray-900 font-medium whitespace-pre-line">{value || ""}</p>
+    </div>
+  </div>
+);
+
+const formatEntry = (item) => {
+  if (!item) return "";
+  if (typeof item === "object") {
+    return Object.values(item)
+      .filter(Boolean)
+      .join(" — ");
+  }
+  return String(item);
+};
+
+const formatList = (data) => {
+  if (!data) return "";
+  if (Array.isArray(data)) return data.map(formatEntry).filter(Boolean).join(", ");
+  return formatEntry(data);
+};
+
+const formatMultiline = (data) => {
+  if (!data) return "";
+  if (Array.isArray(data)) {
+    return data
+      .map(formatEntry)
+      .filter(Boolean)
+      .join("\n");
+  }
+  return formatEntry(data);
+};
 
 const Profile = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadMessage, setUploadMessage] = useState("");
+  const [parsedProfile, setParsedProfile] = useState(null);
+  const [parsedLoading, setParsedLoading] = useState(false);
+  const personalInfoRef = useRef(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -20,6 +70,22 @@ const Profile = () => {
     if (userData) {
       setUser(JSON.parse(userData));
     }
+
+    const loadParsedProfile = async () => {
+      try {
+        setParsedLoading(true);
+        const response = await getParsedProfile();
+        if (response?.success) {
+          setParsedProfile(response.profile);
+        }
+      } catch (err) {
+        // ignore fetch errors silently
+      } finally {
+        setParsedLoading(false);
+      }
+    };
+
+    loadParsedProfile();
   }, [navigate]);
 
   const handleFileUpload = async (e) => {
@@ -70,6 +136,14 @@ const Profile = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     navigate("/login");
+  };
+
+  const handleParsedSave = (profile) => {
+    setParsedProfile(profile);
+    // Scroll to personal info to show updated fields
+    requestAnimationFrame(() => {
+      personalInfoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   };
 
   return (
@@ -168,7 +242,7 @@ const Profile = () => {
           {/* Left Column - Profile Information */}
           <div className="lg:col-span-2 space-y-6">
             {/* Personal Information Card */}
-            <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+            <div ref={personalInfoRef} className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
               <div className="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-200">
                 <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                   <svg
@@ -190,64 +264,16 @@ const Profile = () => {
               {user && (
                 <div className="p-6 space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="group">
-                      <label className="block text-sm font-semibold text-gray-600 mb-2 flex items-center gap-2">
-                        <svg
-                          className="w-4 h-4 text-red-500"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        Full Name
-                      </label>
-                      <div className="bg-gray-50 px-4 py-3 rounded-xl border border-gray-200 group-hover:border-red-200 transition-colors">
-                        <p className="text-lg text-gray-900 font-medium">
-                          {user.name}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="group">
-                      <label className="block text-sm font-semibold text-gray-600 mb-2 flex items-center gap-2">
-                        <svg
-                          className="w-4 h-4 text-red-500"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                          <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                        </svg>
-                        Email Address
-                      </label>
-                      <div className="bg-gray-50 px-4 py-3 rounded-xl border border-gray-200 group-hover:border-red-200 transition-colors">
-                        <p className="text-lg text-gray-900 font-medium">
-                          {user.email}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="group md:col-span-2">
-                      <label className="block text-sm font-semibold text-gray-600 mb-2 flex items-center gap-2">
-                        <svg
-                          className="w-4 h-4 text-red-500"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                        </svg>
-                        Phone Number
-                      </label>
-                      <div className="bg-gray-50 px-4 py-3 rounded-xl border border-gray-200 group-hover:border-red-200 transition-colors">
-                        <p className="text-lg text-gray-900 font-medium">
-                          {user.phoneNumber}
-                        </p>
-                      </div>
-                    </div>
+                    <InfoField label="Full Name" value={user.name} />
+                    <InfoField label="Email Address" value={user.email} />
+                    <InfoField label="Phone Number" value={user.phoneNumber} spanFull />
+                    <InfoField label="Areas of Interest" value={formatList(parsedProfile?.areas_of_interest)} spanFull />
+                    <InfoField label="Skills" value={formatList(parsedProfile?.skills)} spanFull />
+                    <InfoField label="Education" value={formatMultiline(parsedProfile?.education)} spanFull />
+                    <InfoField label="Experience" value={formatMultiline(parsedProfile?.experience)} spanFull />
+                    <InfoField label="Projects" value={formatMultiline(parsedProfile?.projects)} spanFull />
+                    <InfoField label="Certifications" value={formatList(parsedProfile?.certifications)} spanFull />
+                    <InfoField label="Achievements" value={formatList(parsedProfile?.achievements)} spanFull />
                   </div>
                 </div>
               )}
@@ -434,6 +460,9 @@ const Profile = () => {
                 )}
               </div>
             </div>
+
+            {/* AI Resume Parser */}
+            <ResumeParserCard onSave={handleParsedSave} />
           </div>
 
           {/* Right Column - Profile Stats & Actions */}

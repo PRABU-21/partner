@@ -74,4 +74,94 @@ export const getAppliedJobs = async () => {
   return response.data;
 };
 
+// Resume parsing API
+export const parseResume = async (file) => {
+  const formData = new FormData();
+  formData.append("resume", file);
+
+  const response = await api.post("/resume/parse", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+};
+
+export const saveParsedProfile = async (profile) => {
+  const response = await api.post("/resume/save", { profile });
+  return response.data;
+};
+
+export const getParsedProfile = async () => {
+  const response = await api.get("/resume/profile");
+  return response.data;
+};
+
+// Project API calls
+export const getProjects = async (queryString = "") => {
+  const suffix = queryString ? `?${queryString}` : "";
+  const response = await api.get(`/projects${suffix}`);
+  return response.data?.data || response.data || [];
+};
+
+export const createProject = async (projectData) => {
+  const response = await api.post("/projects", projectData);
+  return response.data?.data || response.data;
+};
+
+export const updateProject = async (projectId, updates) => {
+  const response = await api.put(`/projects/${projectId}`, updates);
+  return response.data?.data || response.data;
+};
+
+export const getMyProjects = async () => {
+  const response = await api.get("/projects/my-projects");
+  return response.data?.data || response.data || [];
+};
+
+// Proposal API calls
+export const createProposal = async (proposalData) => {
+  const response = await api.post("/proposals", proposalData);
+  return response.data?.data || response.data;
+};
+
+export const getMyProposals = async () => {
+  const response = await api.get("/proposals/my-proposals");
+  return response.data?.data || response.data || [];
+};
+
+export const getMyActiveProjects = async () => {
+  const response = await api.get("/proposals/my-active-projects");
+  return response.data?.data || response.data || [];
+};
+
+export const getProposalsByProject = async (projectId) => {
+  const response = await api.get(`/proposals/project/${projectId}`);
+  return response.data?.data || response.data || [];
+};
+
+export const updateProposalStatus = async (proposalId, payload) => {
+  const response = await api.put(`/proposals/${proposalId}/status`, payload);
+  return response.data?.data || response.data;
+};
+
+export const submitProposalWork = async (proposalId, payload) => {
+  const response = await api.put(`/proposals/${proposalId}/submit-work`, payload);
+  return response.data?.data || response.data;
+};
+
+// Freelancer profile API calls
+export const getFreelancerProfile = async () => {
+  const response = await api.get("/freelancers/profile");
+  return response.data?.data || response.data;
+};
+
+export const createFreelancerProfile = async (profileData) => {
+  const response = await api.post("/freelancers/profile", profileData);
+  return response.data?.data || response.data;
+};
+
+export const updateFreelancerProfile = async (profileData) => {
+  const response = await api.put("/freelancers/profile", profileData);
+  return response.data?.data || response.data;
+};
+
 export default api;
