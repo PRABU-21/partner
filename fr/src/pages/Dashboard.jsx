@@ -5,6 +5,27 @@ import AddEmbeddingsCard from "../components/AddEmbeddingsCard";
 const Dashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [news, setNews] = useState([]);
+  const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/news");
+        const data = await response.json();
+        if (data.data) {
+          setNews(data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching news:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNews();
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -20,6 +41,14 @@ const Dashboard = () => {
     }
   }, [navigate]);
 
+  const nextNews = () => {
+    setCurrentNewsIndex((prev) => (prev + 1) % news.length);
+  };
+
+  const prevNews = () => {
+    setCurrentNewsIndex((prev) => (prev - 1 + news.length) % news.length);
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -28,7 +57,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-red-50">
-      {/* Modern Navigation */}
       <nav className="bg-white/80 backdrop-blur-lg shadow-sm border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
@@ -49,6 +77,7 @@ const Dashboard = () => {
                 </svg>
               </div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
+                Vectora
                 Vectora
               </h1>
             </div>
@@ -93,7 +122,6 @@ const Dashboard = () => {
         </div>
       </nav>
 
-      {/* Hero Section */}
       <div className="bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 -left-4 w-72 h-72 bg-white rounded-full mix-blend-overlay filter blur-xl animate-blob"></div>
@@ -108,29 +136,123 @@ const Dashboard = () => {
               Your personalized job dashboard is ready. Explore opportunities
               that match your skills and ambitions.
             </p>
-
-            {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-12">
-              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-                <div className="text-3xl font-bold text-white mb-2">25+</div>
-                <div className="text-red-100 text-sm">Job Matches</div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-                <div className="text-3xl font-bold text-white mb-2">95%</div>
-                <div className="text-red-100 text-sm">Profile Strength</div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-                <div className="text-3xl font-bold text-white mb-2">12</div>
-                <div className="text-red-100 text-sm">Active Applications</div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Quick Actions Title */}
+        <div className="mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 mb-6">
+            Latest Tech & Business News
+          </h2>
+          {loading ? (
+            <div className="bg-white rounded-2xl shadow-md p-8 text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
+              <p className="text-gray-600 mt-4">Loading news...</p>
+            </div>
+          ) : news.length > 0 ? (
+            <div className="relative bg-white rounded-2xl shadow-lg overflow-hidden">
+              <div className="p-8">
+                <div className="flex gap-4">
+                  {news[currentNewsIndex]?.image && (
+                    <img
+                      src={news[currentNewsIndex].image}
+                      alt={news[currentNewsIndex].title}
+                      className="w-48 h-32 object-cover rounded-lg"
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                      }}
+                    />
+                  )}
+                  <div className="flex-1">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                      {news[currentNewsIndex]?.title}
+                    </h3>
+                    <p className="text-gray-600 mb-4 line-clamp-3">
+                      {news[currentNewsIndex]?.description ||
+                        "No description available"}
+                    </p>
+                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <span>{news[currentNewsIndex]?.source}</span>
+                      <span>•</span>
+                      <span>
+                        {new Date(
+                          news[currentNewsIndex]?.published_at
+                        ).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <a
+                      href={news[currentNewsIndex]?.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block mt-4 text-red-600 hover:text-red-700 font-semibold"
+                    >
+                      Read more →
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute top-1/2 -translate-y-1/2 left-4">
+                <button
+                  onClick={prevNews}
+                  className="bg-white/80 hover:bg-white p-3 rounded-full shadow-lg transition-all"
+                >
+                  <svg
+                    className="w-6 h-6 text-gray-800"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <div className="absolute top-1/2 -translate-y-1/2 right-4">
+                <button
+                  onClick={nextNews}
+                  className="bg-white/80 hover:bg-white p-3 rounded-full shadow-lg transition-all"
+                >
+                  <svg
+                    className="w-6 h-6 text-gray-800"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <div className="flex justify-center gap-2 pb-4">
+                {news.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentNewsIndex(index)}
+                    className={`w-2 h-2 rounded-full transition-all ${
+                      index === currentNewsIndex
+                        ? "bg-red-600 w-8"
+                        : "bg-gray-300"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="bg-white rounded-2xl shadow-md p-8 text-center">
+              <p className="text-gray-600">No news available at the moment.</p>
+            </div>
+          )}
+        </div>
+
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
             Quick Actions
@@ -138,9 +260,7 @@ const Dashboard = () => {
           <p className="text-gray-600">Choose an action to get started</p>
         </div>
 
-        {/* Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {/* Job Recommendations Card */}
           <div className="group relative bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200 transform hover:-translate-y-1">
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-red-500/10 to-rose-500/10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
             <div className="relative p-6">
@@ -188,7 +308,6 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Update Profile Card */}
           <div className="group relative bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-blue-200 transform hover:-translate-y-1">
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
             <div className="relative p-6">
@@ -236,7 +355,6 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Freelancers Module Card */}
           <div className="group relative bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-purple-200 transform hover:-translate-y-1">
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
             <div className="relative p-6">
@@ -283,7 +401,6 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Add Embeddings Card - Enhanced */}
           <div className="group relative bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-green-200 transform hover:-translate-y-1">
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
             <div className="relative p-6">
@@ -332,7 +449,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Additional Info Section */}
         <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-3xl p-8 md:p-12 relative overflow-hidden">
           <div className="absolute inset-0 opacity-10">
             <div className="absolute -top-4 -right-4 w-40 h-40 bg-white rounded-full filter blur-3xl"></div>
@@ -344,6 +460,7 @@ const Dashboard = () => {
             </h3>
             <p className="text-gray-300 text-lg mb-6 max-w-2xl">
               Explore AI-powered job recommendations, connect with top
+              companies, and advance your career with Vectora — Smart Job & Freelance.
               companies, and advance your career with Vectora.
             </p>
             <button
@@ -371,5 +488,4 @@ const Dashboard = () => {
     </div>
   );
 };
-
 export default Dashboard;

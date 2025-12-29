@@ -7,7 +7,7 @@ import Embedding from "../models/Embedding.js";
 import User from "../models/User.js";
 
 // Create raw responses directory if it doesn't exist
-const rawResponsesDir = path.join(process.cwd(), 'raw_responses');
+const rawResponsesDir = path.join(process.cwd(), "raw_responses");
 if (!fs.existsSync(rawResponsesDir)) {
   fs.mkdirSync(rawResponsesDir, { recursive: true });
 }
@@ -29,9 +29,12 @@ let embedModel = null;
 
 async function loadEmbedModel() {
   if (!embedModel) {
-    console.log('🔄 Loading embedding model...');
-    embedModel = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
-    console.log('✅ Embedding model loaded successfully');
+    console.log("🔄 Loading embedding model...");
+    embedModel = await pipeline(
+      "feature-extraction",
+      "Xenova/all-MiniLM-L6-v2"
+    );
+    console.log("✅ Embedding model loaded successfully");
   }
   return embedModel;
 }
@@ -39,21 +42,21 @@ async function loadEmbedModel() {
 // ----------------- Helper: Clean AI JSON -----------------
 function cleanJsonString(str) {
   str = str.trim();
-  
+
   // Remove markdown code block wrappers
   if (str.startsWith("```")) {
     str = str.split("```")[1] || "";
     str = str.replace(/^json/i, "").trim();
   }
-  
+
   // Remove any trailing markdown
   if (str.endsWith("```")) {
     str = str.substring(0, str.lastIndexOf("```"));
   }
-  
+
   // Replace newlines inside strings with spaces
   str = str.replace(/\r?\n/g, " ");
-  
+
   // Handle unescaped quotes inside strings by being more careful
   try {
     // First try to parse as-is
@@ -65,22 +68,22 @@ function cleanJsonString(str) {
     str = str.replace(/("[^"\\]*)(?:"|\\")([^"\\]*")/g, (match, p1, p2) => {
       return p1 + '\\"' + p2;
     });
-    
+
     // Replace other problematic characters
     str = str.replace(/\\"/g, '"'); // Handle any double escapes
     str = str.replace(/([^\\])"/g, '$1\\"'); // Escape unescaped quotes
-    
+
     // Try to fix common JSON issues
-    str = str.replace(/,\s*}/g, '}'); // Remove trailing commas before }
-    str = str.replace(/,\s*]/g, ']'); // Remove trailing commas before ]
-    
+    str = str.replace(/,\s*}/g, "}"); // Remove trailing commas before }
+    str = str.replace(/,\s*]/g, "]"); // Remove trailing commas before ]
+
     // Remove any content after the final closing brace
-    const lastBrace = str.lastIndexOf('}');
+    const lastBrace = str.lastIndexOf("}");
     if (lastBrace !== -1) {
       str = str.substring(0, lastBrace + 1);
     }
   }
-  
+
   return str.trim();
 }
 
@@ -98,15 +101,15 @@ function safeJsonParse(str) {
       // If still failing, try a more aggressive approach
       // Remove problematic characters while preserving structure
       let aggressiveClean = cleaned
-        .replace(/\r/g, '\\r')  // Escape carriage returns
-        .replace(/\n/g, '\\n')  // Escape newlines
-        .replace(/\t/g, '\\t'); // Escape tabs
-      
+        .replace(/\r/g, "\\r") // Escape carriage returns
+        .replace(/\n/g, "\\n") // Escape newlines
+        .replace(/\t/g, "\\t"); // Escape tabs
+
       try {
         return JSON.parse(aggressiveClean);
       } catch (e3) {
         // If all else fails, return null to indicate failure
-        console.error('All JSON parsing attempts failed:', e3.message);
+        console.error("All JSON parsing attempts failed:", e3.message);
         return null;
       }
     }
@@ -166,7 +169,7 @@ ${textContent}
 `;
 
   try {
-    console.log('🔍 Sending text to Gemini API for parsing...');
+    console.log("🔍 Sending text to Gemini API for parsing...");
     const response = await axios.post(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
@@ -190,7 +193,7 @@ ${textContent}
       }
     );
 
-    console.log('✅ Gemini API responded successfully');
+    console.log("✅ Gemini API responded successfully");
     return response.data.candidates[0].content.parts[0].text;
   } catch (err) {
     console.error("Gemini API error:", err.response?.data || err.message);
@@ -208,118 +211,117 @@ ${textContent}
 // ----------------- Helper: Store raw Gemini response -----------------
 function storeRawResponse(textContent, rawResponse, userId, fileName) {
   try {
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     const userIdClean = userId.toString();
     const fileNameClean = path.parse(fileName).name; // Get just the filename without extension
-    
+
     const rawResponseFileName = `${userIdClean}_${fileNameClean}_${timestamp}.txt`;
     const rawResponsePath = path.join(rawResponsesDir, rawResponseFileName);
-    
+
     // Create content to save: original text + raw Gemini response
-    const contentToSave = `Original Text:
-${'='.repeat(50)}
+    const contentToSave =
+      `Original Text:
+${"=".repeat(50)}
 ${textContent}
 
-` +
-                         `Raw Gemini Response:\n${'='.repeat(50)}\n${rawResponse}\n`;
-    
+` + `Raw Gemini Response:\n${"=".repeat(50)}\n${rawResponse}\n`;
+
     fs.writeFileSync(rawResponsePath, contentToSave);
     console.log(`💾 Raw response saved to: ${rawResponsePath}`);
   } catch (error) {
-    console.error('Error saving raw response:', error);
+    console.error("Error saving raw response:", error);
   }
 }
 
 // ----------------- Controller: Upload Embedding -----------------
 export const uploadEmbedding = async (req, res) => {
   try {
-    console.log('🚀 Starting embedding upload process...');
-    
+    console.log("🚀 Starting embedding upload process...");
+
     if (!req.file) {
-      console.log('❌ No file uploaded');
+      console.log("❌ No file uploaded");
       return res.status(400).json({ error: "No file uploaded" });
     }
-    
+
     console.log(`✅ File uploaded: ${req.file.originalname}`);
     console.log(`📁 File path: ${req.file.path}`);
 
     const textContent = fs.readFileSync(req.file.path, "utf-8");
-    console.log(`📄 Text content loaded, length: ${textContent.length} characters`);
+    console.log(
+      `📄 Text content loaded, length: ${textContent.length} characters`
+    );
 
     // 1️⃣ Parse with Gemini
-    console.log('🔍 Parsing text with Gemini API...');
+    console.log("🔍 Parsing text with Gemini API...");
     let parsedRaw = await parseTextWithGemini(textContent);
-    console.log('📋 Raw Gemini API Response received');
+    console.log("📋 Raw Gemini API Response received");
 
     // Store the raw response in a text file
-    console.log('💾 Storing raw response in file...');
+    console.log("💾 Storing raw response in file...");
     storeRawResponse(textContent, parsedRaw, req.userId, req.file.originalname);
 
     // Use safe JSON parsing
-    console.log('🔄 Attempting to parse Gemini response as JSON...');
+    console.log("🔄 Attempting to parse Gemini response as JSON...");
     let parsedJSON = safeJsonParse(parsedRaw);
-    
+
     if (parsedJSON === null) {
       console.error("❌ Failed to parse Gemini JSON after all attempts");
       return res
         .status(500)
         .json({ error: "Failed to parse Gemini JSON", raw: parsedRaw });
     }
-    
-    console.log('✅ JSON parsed successfully:', Object.keys(parsedJSON));
-    console.log('📋 Parsed Gemini API Response:', JSON.stringify(parsedJSON, null, 2));
+
+    console.log("✅ JSON parsed successfully:", Object.keys(parsedJSON));
+    console.log(
+      "📋 Parsed Gemini API Response:",
+      JSON.stringify(parsedJSON, null, 2)
+    );
 
     // 2️⃣ Load embedding model
-    console.log('🔄 Loading embedding model...');
+    console.log("🔄 Loading embedding model...");
     const model = await loadEmbedModel();
-    console.log('✅ Embedding model loaded');
+    console.log("✅ Embedding model loaded");
 
-    console.log('🔄 Creating embeddings for each field...');
-    let embeddingCount = 0;
-    for (const [field, value] of Object.entries(parsedJSON)) {
-      if (!value) {
-        console.log(`⏭️ Skipping empty field: ${field}`);
-        continue;
-      }
+    // 3️⃣ Use RAW resume text for embedding (matches Python reference exactly)
+    // Python: resume_embedding = model.encode(resume_text, normalize_embeddings=True)
+    console.log(
+      "📝 Using raw resume text for embedding (Python reference approach)"
+    );
+    console.log(`📄 Raw resume text length: ${textContent.length} characters`);
 
-      const content = flatten(value);
-      if (content.trim() === "") {
-        console.log(`⏭️ Skipping empty content for field: ${field}`);
-        continue;
-      }
+    console.log(
+      "🔄 Creating single normalized embedding from RAW resume text..."
+    );
+    const embeddingResult = await model(textContent, {
+      pooling: "mean",
+      normalize: true, // Normalized embeddings (matches Python reference)
+    });
+    const embedding = Array.from(embeddingResult.data);
 
-      console.log(`📝 Processing field: ${field}, content length: ${content.length}`);
-      
-      const embeddingResult = await model(content, {
-        pooling: "mean",
-        normalize: true,
-      });
-      const embedding = Array.from(embeddingResult.data);
-      
-      console.log(`🧮 Embedding vector created with ${embedding.length} dimensions`);
+    console.log(
+      `🧮 Embedding vector created with ${embedding.length} dimensions`
+    );
 
-      // 3️⃣ Save to MongoDB
-      console.log(`💾 Saving embedding to database for field: ${field}`);
-      const embeddingDoc = new Embedding({
-        userId: req.userId,
-        originalFile: req.file.originalname,
-        field,
-        content,
-        embedding,
-      });
+    // 4️⃣ Save single resume embedding to MongoDB
+    console.log(`💾 Saving single resume embedding to database...`);
+    const embeddingDoc = new Embedding({
+      userId: req.userId,
+      originalFile: req.file.originalname,
+      field: "resume", // Standardized field name for consistent retrieval
+      content: textContent, // Store raw text, not parsed fields
+      embedding,
+    });
 
-      await embeddingDoc.save();
-      embeddingCount++;
-      console.log(`✅ Embedding saved to database for field: ${field}`);
-    }
-
-    console.log(`📊 Total embeddings created and saved: ${embeddingCount}`);
-    console.log('🎉 Embedding upload process completed successfully!');
+    await embeddingDoc.save();
+    console.log(`✅ Resume embedding saved to database`);
+    console.log("🎉 Embedding upload process completed successfully!");
 
     res.json({
       message: "Text processed successfully",
       parsed: parsedJSON,
-      embeddingCount,
+      embeddingCount: 1,
+      embeddingDimensions: embedding.length,
+      contentLength: textContent.length,
     });
   } catch (err) {
     console.error("❌ Upload embedding error:", err);
@@ -331,7 +333,7 @@ export const uploadEmbedding = async (req, res) => {
 export const getEmbeddings = async (req, res) => {
   try {
     console.log(`🔍 Fetching embeddings for user: ${req.userId}`);
-    
+
     let query = { userId: req.userId };
     if (req.query.field) {
       query.field = req.query.field;
@@ -344,7 +346,7 @@ export const getEmbeddings = async (req, res) => {
 
     const embeddings = await Embedding.find(query);
     console.log(`✅ Found ${embeddings.length} embeddings`);
-    
+
     res.json({ embeddings, count: embeddings.length });
   } catch (err) {
     console.error("❌ Get embeddings error:", err);
